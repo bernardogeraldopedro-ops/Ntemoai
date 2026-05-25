@@ -102,7 +102,9 @@
           <button class="tag active" onclick="filterTag('all',this)">Todos</button>
         </div>
       </div>
-      <div id="galleryLoading" class="loading">A carregar...</div>
+      <div id="galleryLoading">
+  <div class="skeleton-grid" id="skeletonGrid"></div>
+</div>
       <div class="grid" id="galleryGrid"></div>
       <div id="galleryEmpty" class="empty" style="display:none">Ainda não há fotos publicadas.</div>
       <div class="gallery-footer">
@@ -415,6 +417,23 @@ function renderAdmin(){
 }
 function toast(msg){const t=document.getElementById('toast');t.textContent=msg;t.classList.add('show');setTimeout(()=>t.classList.remove('show'),3000);}
 loadPhotos();
+
+// ---- BACK TO TOP ----
+window.addEventListener('scroll', function() {
+  const btn = document.getElementById('backToTop');
+  if (!btn) return;
+  if (window.scrollY > 200) btn.classList.add('visible');
+  else btn.classList.remove('visible');
+}, { passive: true });
+
 </script>
+
+<!-- BACK TO TOP -->
+<button class="back-to-top" id="backToTop" onclick="window.scrollTo({top:0,behavior:'smooth'})" aria-label="Voltar ao topo">
+  <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5">
+    <polyline points="18 15 12 9 6 15"/>
+  </svg>
+</button>
+
 </body>
 </html>
