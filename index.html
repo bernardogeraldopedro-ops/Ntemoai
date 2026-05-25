@@ -1,0 +1,420 @@
+<!DOCTYPE html>
+<html lang="pt">
+<head>
+<meta charset="UTF-8"/>
+<meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+<title>Ntemoai — Galeria de IA</title>
+<link rel="stylesheet" href="style.css"/>
+</head>
+<body>
+
+<header class="topbar-mobile">
+  <div class="topbar-mobile-left">
+    <div class="logo-box">
+      <div class="logo-icon">NA</div>
+      <div class="logo-text">Ntemoai</div>
+    </div>
+  </div>
+  <div class="topbar-mobile-right">
+    <button class="hamburger" id="hamburgerBtn" aria-label="Abrir menu" onclick="toggleDrawer()">
+      <span></span><span></span><span></span>
+    </button>
+  </div>
+</header>
+
+<aside class="sidebar mobile-drawer" id="mobileDrawer" aria-hidden="true">
+
+
+  <div class="sidebar-logo">
+    <div class="logo-box">
+      <div class="logo-icon">NA</div>
+      <div class="logo-text">Ntemoai</div>
+    </div>
+    <div class="workspace-label">Workspace</div>
+  </div>
+  <div class="sidebar-section">Workspace</div>
+  <div class="sidebar-item" id="navHome" onclick="showPage('pub')">
+    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><path d="M3 9l9-7 9 7v11a2 2 0 01-2 2H5a2 2 0 01-2-2z"/></svg>
+    Início
+  </div>
+  <div class="sidebar-section">Ferramentas</div>
+  <div class="sidebar-item" id="navImage" onclick="showPage('image')">
+    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><rect x="3" y="3" width="18" height="18" rx="2"/><circle cx="8.5" cy="8.5" r="1.5"/><polyline points="21 15 16 10 5 21"/></svg>
+    Imagem
+  </div>
+  <div class="sidebar-item" id="navVideo" onclick="showPage('video')">
+    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><polygon points="23 7 16 12 23 17 23 7"/><rect x="1" y="5" width="15" height="14" rx="2"/></svg>
+    Vídeo
+  </div>
+  <div class="sidebar-section">Biblioteca</div>
+  <div class="sidebar-item active" id="navGallery" onclick="showPage('pub')">
+    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><rect x="3" y="3" width="7" height="7"/><rect x="14" y="3" width="7" height="7"/><rect x="14" y="14" width="7" height="7"/><rect x="3" y="14" width="7" height="7"/></svg>
+    Galeria
+  </div>
+  <div class="sidebar-item" id="navAlbums">
+    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><path d="M22 19a2 2 0 01-2 2H4a2 2 0 01-2-2V5a2 2 0 012-2h5l2 3h9a2 2 0 012 2z"/></svg>
+    Os meus Álbuns
+  </div>
+  <div class="sidebar-section">Info</div>
+  <div class="sidebar-item" id="navAbout" onclick="showPage('about')">
+    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><circle cx="12" cy="12" r="10"/><line x1="12" y1="8" x2="12" y2="12"/><line x1="12" y1="16" x2="12.01" y2="16"/></svg>
+    Sobre
+  </div>
+  <div class="sidebar-item" id="navHowto" onclick="showPage('howto')">
+    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><circle cx="12" cy="12" r="10"/><path d="M9.09 9a3 3 0 015.83 1c0 2-3 3-3 3"/><line x1="12" y1="17" x2="12.01" y2="17"/></svg>
+    Como usar
+  </div>
+  <div class="sidebar-item" id="navPricing" onclick="showPage('pricing')">
+    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><line x1="12" y1="1" x2="12" y2="23"/><path d="M17 5H9.5a3.5 3.5 0 000 7h5a3.5 3.5 0 010 7H6"/></svg>
+    Preços
+  </div>
+  <div class="sidebar-item" id="navContact" onclick="showPage('contact')">
+    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><path d="M4 4h16c1.1 0 2 .9 2 2v12c0 1.1-.9 2-2 2H4c-1.1 0-2-.9-2-2V6c0-1.1.9-2 2-2z"/><polyline points="22,6 12,13 2,6"/></svg>
+    Contacto
+  </div>
+  <div class="sidebar-bottom">
+    <div class="lang-row">
+      <button class="lang-btn active">PT</button>
+      <button class="lang-btn">EN</button>
+    </div>
+
+    <button class="btn-follow">Seguir-nos</button>
+  </div>
+</aside>
+
+
+<main class="main">
+
+  <!-- GALERIA -->
+  <div id="page-pub" class="page active">
+    <div class="gallery-page">
+      <div class="page-header">
+        <div><div class="breadcrumb">Ntemoai</div><h1>Galeria</h1></div>
+        <div class="page-header-right">
+          <button class="btn-explore">Explorar a Galeria</button>
+        </div>
+      </div>
+      <div class="inner-box">
+        <h2>Galeria</h2>
+        <p>Clica em qualquer foto para ver o prompt e recriar à tua maneira.</p>
+        <input class="search-bar" id="searchInput" placeholder="Pesquisar prompts, títulos ou tags" oninput="searchPhotos(this.value)"/>
+        <div class="tags-row" id="tagsRow">
+          <button class="tag active" onclick="filterTag('all',this)">Todos</button>
+        </div>
+      </div>
+      <div id="galleryLoading" class="loading">A carregar...</div>
+      <div class="grid" id="galleryGrid"></div>
+      <div id="galleryEmpty" class="empty" style="display:none">Ainda não há fotos publicadas.</div>
+      <div class="gallery-footer">
+        <div class="footer-grid">
+          <div class="footer-newsletter">
+            <h2>Fica perto<br><span>das novidades.</span></h2>
+            <div class="footer-subscribe">
+              <input type="email" placeholder="o.teu@email.com"/>
+              <button>Subscrever</button>
+            </div>
+          </div>
+          <div class="footer-col">
+            <h4>Trabalho</h4>
+            <a onclick="showPage('pub')">Galeria</a>
+            <a onclick="showPage('image')">Imagem</a>
+            <a onclick="showPage('pricing')">Preços</a>
+          </div>
+          <div class="footer-col">
+            <h4>Info</h4>
+            <a onclick="showPage('about')">Sobre</a>
+            <a onclick="showPage('howto')">Como usar</a>
+            <a onclick="showPage('contact')">Contacto</a>
+            <a>Privacidade</a><a>Termos</a>
+          </div>
+          <div class="footer-col">
+            <h4>Seguir</h4>
+            <a>Facebook</a><a>Instagram</a><a>TikTok</a><a>YouTube</a>
+          </div>
+        </div>
+        <div class="footer-bottom">© 2026 Ntemoai — Todos os direitos reservados</div>
+      </div>
+    </div>
+  </div>
+
+  <!-- DETALHE -->
+  <div id="page-detail" class="page" data-hide-topbar="true">
+
+    <div class="detail-page">
+      <div class="detail-img-wrap" id="detailImgWrap"></div>
+      <div class="detail-sidebar">
+        <button class="back-btn" onclick="showPage('pub')">← Voltar à Galeria</button>
+        <div class="detail-title" id="detailTitle"></div>
+        <div class="detail-date" id="detailDate"></div>
+        <div class="prompt-label">Prompt</div>
+        <div class="prompt-text" id="detailPrompt"></div>
+        <div class="detail-actions">
+          <button class="btn-lg-accent" id="btnCopyPrompt" onclick="copyPrompt()">Copiar Prompt</button>
+          <button class="btn-lg-ghost">Recriar Imagem</button>
+          <button class="btn-lg-ghost">Guardar no Álbum</button>
+          <div class="save-note">Guarda este prompt num álbum.</div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- IMAGEM -->
+  <div id="page-image" class="page">
+    <div class="gallery-page">
+      <div class="page-header"><div><div class="breadcrumb">Ntemoai</div><h1>Imagem</h1></div></div>
+      <div class="inner-box" style="text-align:center;padding:48px;">
+        <div style="font-size:56px;margin-bottom:16px;">🖼️</div>
+        <h2 style="font-size:22px;font-weight:600;margin-bottom:10px;background:none;-webkit-text-fill-color:var(--text);">Criação de Imagens com IA</h2>
+        <p style="max-width:440px;margin:0 auto 24px;">Explora a galeria e copia os prompts para recriar à tua maneira.</p>
+        <button class="btn-create" onclick="showPage('pub')">Ver Galeria</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- VÍDEO -->
+  <div id="page-video" class="page">
+    <div class="gallery-page">
+      <div class="page-header"><div><div class="breadcrumb">Ntemoai</div><h1>Vídeo</h1></div></div>
+      <div class="inner-box" style="text-align:center;padding:48px;">
+        <div style="font-size:56px;margin-bottom:16px;">🎬</div>
+        <h2 style="font-size:22px;font-weight:600;margin-bottom:10px;background:none;-webkit-text-fill-color:var(--text);">Vídeos com IA — Em breve</h2>
+        <p style="max-width:400px;margin:0 auto 24px;">A funcionalidade de geração de vídeos está a ser desenvolvida. Volta em breve!</p>
+        <button class="btn-create" onclick="showPage('pub')">Ver Galeria de Fotos</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- SOBRE -->
+  <div id="page-about" class="page">
+    <div class="gallery-page">
+      <div class="page-header"><div><div class="breadcrumb">Ntemoai</div><h1>Sobre nós</h1></div></div>
+      <div class="info-grid">
+        <div class="info-card"><div class="icon">🤖</div><h3>O que é o Ntemoai?</h3><p>Galeria pessoal de imagens criadas com IA. Partilhamos os melhores prompts para que te possas inspirar e recriar.</p></div>
+        <div class="info-card"><div class="icon">✨</div><h3>A nossa missão</h3><p>Democratizar a criatividade através da IA. Qualquer pessoa pode criar imagens profissionais com os prompts certos.</p></div>
+        <div class="info-card"><div class="icon">📸</div><h3>Como funciona?</h3><p>Cada imagem tem um prompt detalhado. Copia e usa no Gemini, DALL-E ou qualquer ferramenta de IA.</p></div>
+        <div class="info-card"><div class="icon">🌍</div><h3>Feito em Angola</h3><p>Nasceu em Luanda com o objectivo de mostrar que a criatividade com IA não tem fronteiras. Orgulhosamente africano.</p></div>
+      </div>
+    </div>
+  </div>
+
+  <!-- COMO USAR -->
+  <div id="page-howto" class="page">
+    <div class="gallery-page">
+      <div class="page-header"><div><div class="breadcrumb">Ntemoai</div><h1>Como usar</h1></div></div>
+      <p style="font-size:15px;color:var(--text3);margin-bottom:28px;">Aprende a usar o Ntemoai em 4 passos simples.</p>
+      <div class="steps">
+        <div class="step"><div class="step-num">1</div><div><h3>Explora a Galeria</h3><p>Navega pelas imagens. Usa os filtros ou a barra de pesquisa para encontrar o estilo que te inspira.</p></div></div>
+        <div class="step"><div class="step-num">2</div><div><h3>Clica numa foto</h3><p>Abre a página de detalhe onde podes ver o prompt completo usado para gerar aquela imagem.</p></div></div>
+        <div class="step"><div class="step-num">3</div><div><h3>Copia o Prompt</h3><p>Clica em "Copiar Prompt" e usa-o no Gemini, DALL-E, Midjourney ou qualquer outra ferramenta de IA.</p></div></div>
+        <div class="step"><div class="step-num">4</div><div><h3>Recria e Partilha</h3><p>Cola o prompt na tua ferramenta preferida, gera a tua versão e partilha com a comunidade!</p></div></div>
+      </div>
+    </div>
+  </div>
+
+  <!-- PREÇOS -->
+  <div id="page-pricing" class="page">
+    <div class="gallery-page">
+      <div class="page-header"><div><div class="breadcrumb">Ntemoai</div><h1>Preços</h1></div></div>
+      <p style="font-size:15px;color:var(--text3);margin-bottom:32px;">Escolhe o plano que melhor se adapta à tua criatividade.</p>
+      <div class="plans">
+        <div class="plan">
+          <div class="plan-tier">Gratuito</div>
+          <div class="plan-price">0 Kz<span>/mês</span></div>
+          <div class="plan-desc">Para explorar e inspirar.</div>
+          <hr/>
+          <div class="plan-features">
+            <div>✓ Acesso à galeria completa</div>
+            <div>✓ Copiar prompts ilimitado</div>
+            <div>✓ Filtros e pesquisa</div>
+            <div class="off">✗ Álbuns pessoais</div>
+            <div class="off">✗ Prompts exclusivos</div>
+          </div>
+          <button class="btn-explore" style="width:100%;padding:10px;" onclick="showPage('pub')">Começar grátis</button>
+        </div>
+        <div class="plan featured">
+          <div class="plan-badge">POPULAR</div>
+          <div class="plan-tier">Pro</div>
+          <div class="plan-price">9.000 kz<span>/mês</span></div>
+          <div class="plan-desc">Para criadores sérios.</div>
+          <hr/>
+          <div class="plan-features">
+            <div>✓ Tudo do plano Gratuito</div>
+            <div>✓ Álbuns pessoais ilimitados</div>
+            <div>✓ Prompts exclusivos</div>
+            <div>✓ Acesso antecipado</div>
+            <div>✓ Suporte prioritário</div>
+          </div>
+          <button class="btn-create" style="width:100%;padding:10px;">Em breve</button>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- CONTACTO -->
+  <div id="page-contact" class="page">
+    <div class="gallery-page">
+      <div class="page-header"><div><div class="breadcrumb">Ntemoai</div><h1>Contacto</h1></div></div>
+      <div class="contact-grid">
+        <div>
+          <p style="font-size:14px;color:var(--text3);line-height:1.7;margin-bottom:24px;">Tens perguntas ou queres colaborar? Entra em contacto — respondemos sempre!</p>
+          <div class="contact-info">
+            <div class="contact-item"><div class="ci-icon">📧</div><div><div class="ci-label">Email</div><div class="ci-val">ntemoai@gmail.com</div></div></div>
+            <div class="contact-item"><div class="ci-icon">📘</div><div><div class="ci-label">Facebook</div><div class="ci-val">facebook.com/ntemoai</div></div></div>
+            <div class="contact-item"><div class="ci-icon">📍</div><div><div class="ci-label">Localização</div><div class="ci-val">Luanda, Angola</div></div></div>
+          </div>
+        </div>
+        <div class="contact-form">
+          <h3>Envia uma mensagem</h3>
+          <div class="field"><label>Nome</label><input type="text" placeholder="O teu nome"/></div>
+          <div class="field"><label>Email</label><input type="email" placeholder="O teu email"/></div>
+          <div class="field"><label>Mensagem</label><textarea placeholder="Escreve aqui a tua mensagem..."></textarea></div>
+          <button class="btn-pub" onclick="this.textContent='✓ Enviado!';setTimeout(()=>this.textContent='Enviar Mensagem',2500)">Enviar Mensagem</button>
+        </div>
+      </div>
+    </div>
+  </div>
+
+</main>
+
+<div id="toast"></div>
+
+<script type="module">
+import { initializeApp } from 'https://www.gstatic.com/firebasejs/10.12.0/firebase-app.js';
+import { getFirestore, collection, addDoc, getDocs, deleteDoc, doc, orderBy, query } from 'https://www.gstatic.com/firebasejs/10.12.0/firebase-firestore.js';
+
+const firebaseConfig = {
+  apiKey: "AIzaSyAM4pBCDH_5E08PrQX90cn4yIJ2fJVKgPw",
+  authDomain: "ntemoai.firebaseapp.com",
+  projectId: "ntemoai",
+  storageBucket: "ntemoai.firebasestorage.app",
+  messagingSenderId: "514059965473",
+  appId: "1:514059965473:web:6be0b5285604e681e47f60"
+};
+const app = initializeApp(firebaseConfig);
+const db = getFirestore(app);
+let allPhotos=[], photos=[], currentPhoto=null;
+
+function showPage(page) {
+  document.querySelectorAll('.page').forEach(p=>p.classList.remove('active'));
+  document.querySelectorAll('.sidebar-item').forEach(i=>i.classList.remove('active'));
+  const navMap={pub:'navGallery',image:'navImage',video:'navVideo',about:'navAbout',howto:'navHowto',pricing:'navPricing',contact:'navContact'};
+  if(navMap[page]){const n=document.getElementById(navMap[page]);if(n)n.classList.add('active');}
+  if(page==='pub'){document.getElementById('page-pub').classList.add('active');loadPhotos();}
+  else if(page==='detail'){document.getElementById('page-detail').classList.add('active');}
+  else{const el=document.getElementById('page-'+page);if(el)el.classList.add('active');}
+
+  if(window.innerWidth <= 900){toggleDrawer(false);}
+}
+window.showPage=showPage;
+
+if(window.location.hash === '#/admin'){window.location.replace('admin.html');}
+
+function toggleDrawer(force){
+  const drawer=document.getElementById('mobileDrawer');
+  if(!drawer) return;
+  const open=drawer.classList.contains('open');
+  const should=(typeof force==='boolean')?force:!open;
+  if(should) drawer.classList.add('open');
+  else drawer.classList.remove('open');
+}
+window.toggleDrawer=toggleDrawer;
+
+document.addEventListener('click',(e)=>{
+  const drawer=document.getElementById('mobileDrawer');
+  const btn=document.getElementById('hamburgerBtn');
+  if(!drawer) return;
+  if(drawer.classList.contains('open')){
+    if(btn && btn.contains(e.target)) return;
+    if(drawer.contains(e.target)) return;
+    drawer.classList.remove('open');
+  }
+});
+
+async function loadPhotos(){
+
+  document.getElementById('galleryLoading').style.display='block';
+  document.getElementById('galleryGrid').innerHTML='';
+  try{
+    const snap=await getDocs(query(collection(db,'photos'),orderBy('createdAt','desc')));
+    allPhotos=snap.docs.map(d=>({id:d.id,...d.data()}));photos=[...allPhotos];
+  }catch(e){allPhotos=[];photos=[];}
+  document.getElementById('galleryLoading').style.display='none';
+  buildTags();renderGallery();
+}
+
+function buildTags(){
+  const cats=[...new Set(allPhotos.map(p=>p.category).filter(Boolean))];
+  document.getElementById('tagsRow').innerHTML='<button class="tag active" onclick="filterTag(\'all\',this)">Todos</button>'+
+    cats.map(c=>'<button class="tag" onclick="filterTag(\''+c+'\',this)">'+c+'</button>').join('');
+}
+window.filterTag=function(tag,btn){
+  document.querySelectorAll('.tag').forEach(b=>b.classList.remove('active'));
+  btn.classList.add('active');
+  photos=tag==='all'?[...allPhotos]:allPhotos.filter(p=>p.category===tag);
+  renderGallery();
+};
+window.searchPhotos=function(val){
+  const v=val.toLowerCase();
+  photos=allPhotos.filter(p=>(p.title||'').toLowerCase().includes(v)||(p.prompt||'').toLowerCase().includes(v)||(p.category||'').toLowerCase().includes(v));
+  renderGallery();
+};
+function renderGallery(){
+  const grid=document.getElementById('galleryGrid');
+  const empty=document.getElementById('galleryEmpty');
+  if(!photos.length){grid.innerHTML='';empty.style.display='block';return;}
+  empty.style.display='none';
+  grid.innerHTML=photos.map(p=>
+    '<div class="g-card" onclick="openDetail(\''+p.id+'\')">'+
+      (p.imgUrl?'<img class="g-card-img" src="'+p.imgUrl+'" loading="lazy"/>':'<div class="g-card-placeholder">🖼️</div>')+
+      '<div class="g-card-body">'+
+        '<div class="g-card-title">'+p.title+'</div>'+
+        '<div class="g-card-date">'+(p.date||'')+'</div>'+
+        '<div class="g-card-actions">'+
+          '<button class="btn-sm-accent" onclick="event.stopPropagation();openDetail(\''+p.id+'\')">Recriar</button>'+
+          '<button class="btn-sm-ghost" onclick="event.stopPropagation();openDetail(\''+p.id+'\')">Ver Prompt</button>'+
+        '</div>'+
+      '</div>'+
+    '</div>'
+  ).join('');
+}
+window.openDetail=function(id){
+  currentPhoto=allPhotos.find(p=>p.id===id);if(!currentPhoto)return;
+  document.getElementById('detailImgWrap').innerHTML=currentPhoto.imgUrl
+    ?'<img src="'+currentPhoto.imgUrl+'" style="max-width:100%;max-height:80vh;border-radius:14px;object-fit:contain;"/>'
+    :'<div class="detail-img-placeholder">🖼️</div>';
+  document.getElementById('detailTitle').textContent=currentPhoto.title;
+  document.getElementById('detailDate').textContent=currentPhoto.date||'';
+  document.getElementById('detailPrompt').textContent=currentPhoto.prompt;
+  document.getElementById('btnCopyPrompt').textContent='Copiar Prompt';
+  document.getElementById('btnCopyPrompt').classList.remove('copied');
+  showPage('detail');
+};
+window.copyPrompt=function(){
+  if(!currentPhoto)return;
+  navigator.clipboard.writeText(currentPhoto.prompt).then(()=>{
+    const btn=document.getElementById('btnCopyPrompt');
+    btn.textContent='✓ Copiado!';btn.classList.add('copied');
+    setTimeout(()=>{btn.textContent='Copiar Prompt';btn.classList.remove('copied');},2500);
+  });
+};
+function renderAdmin(){
+  const cats=[...new Set(allPhotos.map(p=>p.category).filter(Boolean))];
+  document.getElementById('sCount').textContent=allPhotos.length;
+  document.getElementById('sCats').textContent=cats.length;
+  document.getElementById('sPrompts').textContent=allPhotos.length;
+  const list=document.getElementById('adminList');
+  if(!allPhotos.length){list.innerHTML='<div class="empty">Ainda não publicaste nenhuma foto.</div>';return;}
+  list.innerHTML=allPhotos.map(p=>
+    '<div class="list-row">'+
+      '<div class="list-thumb">'+(p.imgUrl?'<img src="'+p.imgUrl+'"/>':'🖼️')+'</div>'+
+      '<div class="list-info"><p>'+p.title+'</p><span>'+(p.date||'')+' · '+(p.category||'')+'</span></div>'+
+      '<span class="pub-badge">Publicado</span>'+
+      '<button class="del-btn" onclick="deletePhoto(\''+p.id+'\')">Eliminar</button>'+
+    '</div>'
+  ).join('');
+}
+function toast(msg){const t=document.getElementById('toast');t.textContent=msg;t.classList.add('show');setTimeout(()=>t.classList.remove('show'),3000);}
+loadPhotos();
+</script>
+</body>
+</html>
