@@ -154,6 +154,31 @@
           <button class="btn-lg-accent" id="btnCopyPrompt" onclick="copyPrompt()">Copiar Prompt</button>
           <button class="btn-lg-ghost">Recriar Imagem</button>
           <button class="btn-lg-ghost">Guardar no Álbum</button>
+
+          <!-- SOCIAL: Like + Views + Share -->
+          <div class="detail-social">
+            <div class="detail-social-row">
+              <div class="detail-views">
+                <span class="detail-views-icon">👁️</span>
+                <span class="detail-views-num" id="detailViews">0</span>
+              </div>
+
+              <button class="like-btn detail-like-btn" id="detailLikeBtn" type="button" onclick="toggleLike('')" aria-label="Curtir">
+                <span class="heart" id="detailLikeHeart">🤍</span>
+              </button>
+              <div class="detail-likes">
+                <span class="detail-likes-num" id="detailLikes">0</span>
+              </div>
+            </div>
+          </div>
+
+          <div class="share-label">Partilhar</div>
+          <div class="share-row" id="detailShareRow">
+            <button class="share-btn" data-share="whatsapp" type="button">WhatsApp</button>
+            <button class="share-btn" data-share="facebook" type="button">Facebook</button>
+            <button class="share-btn" data-share="copy" type="button">Copiar Link</button>
+          </div>
+
           <div class="save-note">Guarda este prompt num álbum.</div>
         </div>
       </div>
@@ -282,7 +307,7 @@
 
 <script type="module">
 import { initializeApp } from 'https://www.gstatic.com/firebasejs/10.12.0/firebase-app.js';
-import { getFirestore, collection, addDoc, getDocs, deleteDoc, doc, orderBy, query } from 'https://www.gstatic.com/firebasejs/10.12.0/firebase-firestore.js';
+import { getFirestore, collection, addDoc, getDocs, deleteDoc, doc, orderBy, query, updateDoc, increment, getDoc, setDoc } from 'https://www.gstatic.com/firebasejs/10.12.0/firebase-firestore.js';
 
 const firebaseConfig = {
   apiKey: "AIzaSyAM4pBCDH_5E08PrQX90cn4yIJ2fJVKgPw",
@@ -295,6 +320,7 @@ const firebaseConfig = {
 const app = initializeApp(firebaseConfig);
 const db = getFirestore(app);
 let allPhotos=[], photos=[], currentPhoto=null;
+let currentPhotoId=null;
 
 function showPage(page) {
   document.querySelectorAll('.page').forEach(p=>p.classList.remove('active'));
@@ -365,21 +391,38 @@ function renderGallery(){
   const empty=document.getElementById('galleryEmpty');
   if(!photos.length){grid.innerHTML='';empty.style.display='block';return;}
   empty.style.display='none';
-  grid.innerHTML=photos.map(p=>
-    '<div class="g-card" onclick="openDetail(\''+p.id+'\')">'+
-      (p.imgUrl?'<img class="g-card-img" src="'+p.imgUrl+'" loading="lazy"/>':'<div class="g-card-placeholder">🖼️</div>')+
-      '<div class="g-card-body">'+
-        '<div class="g-card-title">'+p.title+'</div>'+
-        '<div class="g-card-date">'+(p.date||'')+'</div>'+
-        '<div class="g-card-actions">'+
-          '<button class="btn-sm-accent" onclick="event.stopPropagation();openDetail(\''+p.id+'\')">Recriar</button>'+
-          '<button class="btn-sm-ghost" onclick="event.stopPropagation();openDetail(\''+p.id+'\')">Ver Prompt</button>'+
+  grid.innerHTML=photos.map(p=>{
+    const viewsNum = Number(p.views ?? 0);
+    const likesNum = Number(p.likes ?? 0);
+    const liked = localStorage.getItem('ntemoai-liked-'+p.id) === '1';
+
+    return (
+      '<div class="g-card" onclick="openDetail(\''+p.id+'\')">'+
+        (p.imgUrl?'<img class="g-card-img" src="'+p.imgUrl+'" loading="lazy"/>':'<div class="g-card-placeholder">🖼️</div>')+
+        '<div class="g-card-body">'+
+          '<div class="g-card-title">'+p.title+'</div>'+
+          '<div class="g-card-date">'+(p.date||'')+'</div>'+
+          '<div class="g-card-stats">'+
+            '<div class="g-card-stat">'+
+              '<span class="g-card-views-icon" aria-hidden="true">👁️</span>'+
+              '<span class="g-card-views-num" id="views-'+p.id+'">'+viewsNum+'</span>'+
+            '</div>'+
+            '<button class="btn-like'+(liked?' liked':'')+'" data-like-id="'+p.id+'" onclick="event.stopPropagation();toggleLike(\''+p.id+'\')" aria-label="Curtir" type="button">'+
+              '<span class="g-card-heart" aria-hidden="true">'+(liked?'❤️':'🤍')+'</span>'+
+              '<span class="g-card-like-num" id="likes-'+p.id+'">'+likesNum+'</span>'+
+            '</button>'+
+          '</div>'+
+          '<div class="g-card-actions">'+
+            '<button class="btn-sm-accent" onclick="event.stopPropagation();openDetail(\''+p.id+'\')">Recriar</button>'+
+            '<button class="btn-sm-ghost" onclick="event.stopPropagation();openDetail(\''+p.id+'\')">Ver Prompt</button>'+
+          '</div>'+
         '</div>'+
-      '</div>'+
-    '</div>'
-  ).join('');
+      '</div>'
+    );
+  }).join('');
 }
 window.openDetail=function(id){
+  currentPhotoId=id;
   currentPhoto=allPhotos.find(p=>p.id===id);if(!currentPhoto)return;
   document.getElementById('detailImgWrap').innerHTML=currentPhoto.imgUrl
     ?'<img src="'+currentPhoto.imgUrl+'" style="max-width:100%;max-height:80vh;border-radius:14px;object-fit:contain;"/>'
@@ -387,10 +430,175 @@ window.openDetail=function(id){
   document.getElementById('detailTitle').textContent=currentPhoto.title;
   document.getElementById('detailDate').textContent=currentPhoto.date||'';
   document.getElementById('detailPrompt').textContent=currentPhoto.prompt;
+
+  const viewsNum = Number(currentPhoto.views ?? 0);
+  const likesNum = Number(currentPhoto.likes ?? 0);
+  const liked = localStorage.getItem('ntemoai-liked-'+currentPhotoId) === '1';
+
+  document.getElementById('detailViews').textContent=viewsNum;
+  document.getElementById('detailLikes').textContent=likesNum;
+
+  const likeBtn = document.getElementById('detailLikeBtn');
+  if(likeBtn){likeBtn.classList.toggle('liked', liked);}
+  const heartEl = document.getElementById('detailLikeHeart');
+  if(heartEl){heartEl.textContent = liked?'❤️':'🤍';}
+
+  const syncBtnCount=()=>{
+    const likeCountEl=document.getElementById('detailLikes');
+    if(likeCountEl) likeCountEl.textContent=likesNum;
+  };
+  syncBtnCount();
+
   document.getElementById('btnCopyPrompt').textContent='Copiar Prompt';
   document.getElementById('btnCopyPrompt').classList.remove('copied');
+
+  renderShareButtons();
   showPage('detail');
+
+  // Incrementa contador de views e sincroniza contadores mais recentes (best-effort)
+  ensureViewsAndRefreshUI(currentPhotoId);
+  syncLikeButtonUIFromStorage(currentPhotoId);
 };
+
+function localLikeKey(photoId){return 'ntemoai-liked-'+photoId;}
+
+window.toggleLike=async function(photoId){
+  if(!photoId) photoId=currentPhotoId;
+  if(!photoId) return;
+  const likedAlready = localStorage.getItem(localLikeKey(photoId)) === '1';
+  if(likedAlready) return;
+
+  localStorage.setItem(localLikeKey(photoId), '1');
+
+  // animação (best-effort)
+  window.pulseLikeHeart && window.pulseLikeHeart();
+
+  const likeBtn=document.getElementById('detailLikeBtn');
+  const heartEl=document.getElementById('detailLikeHeart');
+  if(likeBtn) likeBtn.classList.add('liked');
+  if(heartEl) heartEl.textContent='❤️';
+
+  const likesEl=document.getElementById('detailLikes');
+  const currentLikes = Number(likesEl?.textContent ?? document.getElementById('likes-'+photoId)?.textContent ?? currentPhoto?.likes ?? 0);
+  if(likesEl) likesEl.textContent = currentLikes + 1;
+  const galleryLikesEl=document.getElementById('likes-'+photoId);
+  if(galleryLikesEl) galleryLikesEl.textContent = Number(galleryLikesEl.textContent ?? 0) + 1;
+
+  try{
+    const ref = doc(db,'photos',photoId);
+    await updateDoc(ref,{likes: increment(1)});
+  }catch(e){
+    try{
+      const ref = doc(db,'photos',photoId);
+      await setDoc(ref,{likes:1},{merge:true});
+    }catch(_){}
+  }
+
+  syncLikeButtonUIFromStorage(photoId);
+};
+
+window.pulseLikeHeart=function(){
+  const heartEl=document.getElementById('detailLikeHeart');
+
+  if(!heartEl) return;
+  heartEl.classList.remove('like-pulse');
+  void heartEl.offsetWidth;
+  heartEl.classList.add('like-pulse');
+  setTimeout(()=>heartEl.classList.remove('like-pulse'), 650);
+};
+
+
+
+window.syncLikeButtonUIFromStorage=function(photoId){
+  const liked = localStorage.getItem(localLikeKey(photoId)) === '1';
+  const detailBtn=document.getElementById('detailLikeBtn');
+  const heartEl=document.getElementById('detailLikeHeart');
+  if(detailBtn) detailBtn.classList.toggle('liked', liked);
+  if(heartEl) heartEl.textContent = liked ? '❤️' : '🤍';
+
+  const galleryLikedHeart=document.querySelector('.like-btn[data-like-id="'+photoId+'"] .heart');
+  const galleryBtn=document.querySelector('.like-btn[data-like-id="'+photoId+'"]');
+  if(galleryBtn) galleryBtn.classList.toggle('liked', liked);
+  if(galleryLikedHeart) galleryLikedHeart.textContent = liked ? '❤️' : '🤍';
+};
+
+async function ensureViewsAndRefreshUI(photoId){
+  if(!photoId) return;
+  try{
+    const ref=doc(db,'photos',photoId);
+    await updateDoc(ref,{views: increment(1)});
+    const snap = await getDoc(ref);
+    if(snap.exists()){
+      const data=snap.data();
+      const viewsNum=Number(data.views ?? 0);
+      const detailViewsEl=document.getElementById('detailViews');
+      if(detailViewsEl) detailViewsEl.textContent=viewsNum;
+      const galleryViewsEl=document.getElementById('views-'+photoId);
+      if(galleryViewsEl) galleryViewsEl.textContent=viewsNum;
+      if(currentPhoto) currentPhoto.views=viewsNum;
+    }
+  }catch(e){
+    try{
+      const ref=doc(db,'photos',photoId);
+      await setDoc(ref,{views:1},{merge:true});
+      const snap = await getDoc(ref);
+      if(snap.exists()){
+        const viewsNum=Number(snap.data().views ?? 0);
+        const detailViewsEl=document.getElementById('detailViews');
+        if(detailViewsEl) detailViewsEl.textContent=viewsNum;
+        const galleryViewsEl=document.getElementById('views-'+photoId);
+        if(galleryViewsEl) galleryViewsEl.textContent=viewsNum;
+        if(currentPhoto) currentPhoto.views=viewsNum;
+      }
+    }catch(_){
+    }
+  }
+}
+
+window.renderShareButtons=function(){
+  // Apenas garante que os listeners/cópias funcionam no momento do click
+  const row=document.getElementById('detailShareRow');
+  if(!row || !currentPhoto) return;
+
+  const title = (currentPhoto.title||'').trim();
+  const prompt = (currentPhoto.prompt||'').trim();
+  const shareText = (title ? title+'\n\n' : '') + prompt;
+  const pageUrl = window.location.href;
+
+  const whatsappBtn = row.querySelector('[data-share="whatsapp"]');
+  const facebookBtn = row.querySelector('[data-share="facebook"]');
+  const copyBtn = row.querySelector('[data-share="copy"]');
+
+  if(whatsappBtn){
+    whatsappBtn.onclick = function(){
+      const url = 'https://wa.me/?text='+encodeURIComponent(shareText);
+      window.open(url,'_blank','noopener');
+    }
+  }
+  if(facebookBtn){
+    facebookBtn.onclick = function(){
+      const url = 'https://www.facebook.com/sharer/sharer.php?u='+encodeURIComponent(pageUrl);
+      window.open(url,'_blank','noopener');
+    }
+  }
+  if(copyBtn){
+    copyBtn.onclick = async function(){
+      try{
+        await navigator.clipboard.writeText(pageUrl);
+        toast('✅ Link copiado!');
+      }catch(_){
+        try{
+          const ta=document.createElement('textarea');
+          ta.value=pageUrl;document.body.appendChild(ta);ta.select();document.execCommand('copy');ta.remove();
+          toast('✅ Link copiado!');
+        }catch(__){
+          toast('❌ Não foi possível copiar o link.');
+        }
+      }
+    }
+  }
+};
+
 window.copyPrompt=function(){
   if(!currentPhoto)return;
   navigator.clipboard.writeText(currentPhoto.prompt).then(()=>{

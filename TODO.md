@@ -1,9 +1,8 @@
-# TODO — Visual improvements (Ntemoai)
-
-- [x] Implement LOADING SKELETON (6 shimmer skeleton cards) replacing “A carregar...” in index.html; add CSS shimmer using --bg2/--bg3
-- [x] Add SMOOTH PAGE TRANSITIONS: fade/translate animation on `.page.active` in style.css
-- [ ] Add CARD HOVER EFFECTS: image zoom, gradient overlay with title area, border glow in style.css
-- [ ] Implement GALLERY MASONRY-STYLE: convert gallery to CSS grid masonry with `grid-auto-rows` and `span-*` classes; update index.html rendering + skeleton to include span classes
-- [ ] Add BACK TO TOP BUTTON: floating gradient button; show after scroll 200px; hide on desktop sidebar pages; smooth scroll to top
-- [ ] Quick verification: open index.html, test loader, transitions, hover, masonry heights, back-to-top behavior
+- [ ] Atualizar index.html: importar `increment` e adicionar lógica de Firestore para `views` (increment em openDetail) com fallback via `getDoc` + `setDoc({merge:true})`
+- [ ] Atualizar index.html: renderizar contador de views nos cards (bottom-left) e no sidebar do detalhe
+- [ ] Atualizar index.html: adicionar botão de like em cards e no detalhe; usar `localStorage` para evitar duplicados; persistir contagem em Firestore com fallback via `setDoc({merge:true})`
+- [ ] Atualizar index.html: animar coração no clique (classe de pulse) e atualizar contador na UI
+- [ ] Atualizar index.html: adicionar botões de share (WhatsApp, Facebook, Copy Link) abaixo do prompt no detalhe
+- [ ] Atualizar style.css: estilos novos para views, like e share com borda/tema escuro (usar variáveis CSS existentes)
+- [ ] Testar manualmente: abrir detalhes incrementa views; like funciona 1x por browser; share copia link e abre redes
 
