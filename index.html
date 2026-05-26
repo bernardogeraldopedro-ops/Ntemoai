@@ -305,6 +305,69 @@
 
 <div id="toast"></div>
 
+<!-- MODAL RECRIAÇÃO COM GEMINI -->
+<div id="recreateModalOverlay" class="recreate-modal-overlay" style="display:none;" aria-hidden="true">
+  <div id="recreateModal" class="recreate-modal" role="dialog" aria-modal="true" aria-labelledby="recreateModalTitle">
+    <div class="recreate-modal-border" aria-hidden="true"></div>
+
+    <div class="recreate-modal-inner">
+      <div class="recreate-modal-header">
+        <h2 id="recreateModalTitle">Recriar com Gemini ✨</h2>
+        <button type="button" class="recreate-close" id="recreateCloseBtn" aria-label="Fechar">✕</button>
+      </div>
+
+      <div class="recreate-body">
+        <div class="recreate-field">
+          <label for="geminiKeyInput">Chave API Gemini</label>
+          <div class="recreate-key-wrap">
+            <input id="geminiKeyInput" type="password" placeholder="AIza... (cola a tua chave aqui)" autocomplete="off"/>
+            <button type="button" class="recreate-key-toggle" id="toggleKeyBtn" onclick="toggleKeyVisibility()" title="Mostrar/ocultar chave">👁</button>
+          </div>
+          <div class="recreate-hint">🔒 A chave é guardada localmente no teu browser — nunca é enviada para os nossos servidores.</div>
+        </div>
+
+        <div class="recreate-field">
+          <label for="promptInput">Prompt da imagem</label>
+          <textarea id="promptInput" readonly></textarea>
+        </div>
+
+        <div class="recreate-field">
+          <label>Anexa a tua foto</label>
+          <div id="uploadDropZone" class="recreate-dropzone" role="button" tabindex="0" aria-label="Anexar foto">
+            <div class="recreate-dropzone-icon">⬆️</div>
+            <div class="recreate-dropzone-text">Anexa a tua foto</div>
+            <div class="recreate-dropzone-sub">Arrasta e solta ou clica para escolher (imagem apenas)</div>
+            <input id="uploadFileInput" type="file" accept="image/*" style="display:none"/>
+          </div>
+        </div>
+
+        <div class="recreate-field">
+          <label>Pré-visualização</label>
+          <div id="imagePreviewWrap" class="recreate-preview-wrap" style="display:none;">
+            <img id="imagePreview" alt="Pré-visualização"/>
+          </div>
+        </div>
+
+        <button id="generateBtn" class="recreate-generate-btn" type="button">
+          <span class="recreate-generate-icon">🚀</span>
+          Gerar imagem
+          <span class="recreate-spinner" id="generateSpinner" aria-hidden="true"></span>
+        </button>
+
+        <div id="generateStatus" class="recreate-status" style="display:none;">A gerar imagem...</div>
+
+        <div id="resultWrap" class="recreate-result" style="display:none;">
+          <div class="recreate-result-label">Resultado</div>
+          <img id="generatedImage" alt="Imagem gerada"/>
+          <button id="downloadBtn" class="recreate-download-btn" type="button" style="display:none;">⬇️ Guardar imagem</button>
+        </div>
+
+        <div id="recreateError" class="recreate-error" style="display:none;"></div>
+      </div>
+    </div>
+  </div>
+</div>
+
 <script type="module">
 import { initializeApp } from 'https://www.gstatic.com/firebasejs/10.12.0/firebase-app.js';
 import { getFirestore, collection, addDoc, getDocs, deleteDoc, doc, orderBy, query, updateDoc, increment, getDoc, setDoc } from 'https://www.gstatic.com/firebasejs/10.12.0/firebase-firestore.js';
@@ -413,7 +476,7 @@ function renderGallery(){
             '</button>'+
           '</div>'+
           '<div class="g-card-actions">'+
-            '<button class="btn-sm-accent" onclick="event.stopPropagation();openDetail(\''+p.id+'\')">Recriar</button>'+
+            '<button class="btn-sm-accent" onclick="event.stopPropagation();openRecreateModal(\''+(p.prompt||'').replace(/'/g,"\\'")+'\')">Recriar</button>'+
             '<button class="btn-sm-ghost" onclick="event.stopPropagation();openDetail(\''+p.id+'\')">Ver Prompt</button>'+
           '</div>'+
         '</div>'+
@@ -626,6 +689,363 @@ function renderAdmin(){
 function toast(msg){const t=document.getElementById('toast');t.textContent=msg;t.classList.add('show');setTimeout(()=>t.classList.remove('show'),3000);}
 loadPhotos();
 
+// ==============================
+// RECRIAÇÃO COM GEMINI (Modal)
+// ==============================
+const GEMINI_API_KEY = "AIzaSyAbamD-e9VkVFoKn5bGOd_67v5VXhVDdU0";
+
+let recreateState = {
+  file: null,
+  base64Image: null,
+  generatedBase64: null,
+  generatedMimeType: null
+};
+
+function qs(id){return document.getElementById(id);} 
+function getModalOverlay(){return qs('recreateModalOverlay');}
+function isModalOpen(){return !getModalOverlay() || getModalOverlay().style.display !== 'none';}
+
+function showRecreateError(msg){
+  const err = qs('recreateError');
+  if(!err) return;
+  err.textContent = msg;
+  err.style.display = 'block';
+}
+function clearRecreateError(){
+  const err = qs('recreateError');
+  if(!err) return;
+  err.textContent = '';
+  err.style.display = 'none';
+}
+
+function setGenerateLoading(isLoading){
+  const btn = qs('generateBtn');
+  const spinner = qs('generateSpinner');
+  const status = qs('generateStatus');
+  const downloadBtn = qs('downloadBtn');
+
+  if(btn) btn.disabled = !!isLoading;
+  if(spinner) spinner.style.display = isLoading ? 'inline-block' : 'none';
+  if(status) status.style.display = isLoading ? 'block' : 'none';
+  if(isLoading){
+    if(downloadBtn) downloadBtn.style.display = 'none';
+  }
+}
+
+function resetRecreateResults(){
+  recreateState.generatedBase64 = null;
+  recreateState.generatedMimeType = null;
+  const resultWrap = qs('resultWrap');
+  const img = qs('generatedImage');
+  const downloadBtn = qs('downloadBtn');
+  if(resultWrap) resultWrap.style.display = 'none';
+  if(img) img.removeAttribute('src');
+  if(downloadBtn) downloadBtn.style.display = 'none';
+}
+
+function openRecreateModal(promptText){
+  const overlay = getModalOverlay();
+  if(!overlay) return;
+
+  clearRecreateError();
+  resetRecreateResults();
+
+  recreateState.file = null;
+  recreateState.base64Image = null;
+
+  const promptArea = qs('promptInput');
+  if(promptArea) promptArea.value = (promptText || '');
+
+  // chave
+  const keyInput = qs('geminiKeyInput');
+  const savedKey = (function(){
+    try{ return localStorage.getItem('gemini_key') || ''; }catch(_){ return ''; }
+  })();
+  if(keyInput){
+    keyInput.value = savedKey || GEMINI_API_KEY;
+  }
+
+  // upload UI
+  const dropZone = qs('uploadDropZone');
+  const fileInput = qs('uploadFileInput');
+  const previewWrap = qs('imagePreviewWrap');
+  const previewImg = qs('imagePreview');
+  if(previewWrap) previewWrap.style.display = 'none';
+  if(previewImg) previewImg.removeAttribute('src');
+
+  if(fileInput) fileInput.value = '';
+  if(dropZone) dropZone.classList.remove('over');
+
+  overlay.style.display = 'flex';
+  overlay.style.opacity = '1';
+  overlay.setAttribute('aria-hidden','false');
+
+  // foco
+  setTimeout(()=>{
+    const k = qs('geminiKeyInput');
+    if(k) k.focus();
+  }, 50);
+}
+
+function closeRecreateModal(){
+  const overlay = getModalOverlay();
+  if(!overlay) return;
+  overlay.style.display = 'none';
+  overlay.setAttribute('aria-hidden','true');
+}
+
+window.openRecreateModal = openRecreateModal;
+window.closeRecreateModal = closeRecreateModal;
+
+async function fileToBase64(file){
+  return new Promise((resolve, reject)=>{
+    const reader = new FileReader();
+    reader.onerror = ()=>reject(new Error('Não foi possível ler o ficheiro.'));
+    reader.onload = ()=>{
+      const result = String(reader.result || '');
+      // data:[mime];base64,XXXX
+      const match = result.match(/^data:([^;]+);base64,(.*)$/);
+      if(!match) return reject(new Error('Formato de imagem inválido.'));
+      const mime = match[1];
+      const b64 = match[2];
+      resolve({ mime, base64: b64 });
+    };
+    reader.readAsDataURL(file);
+  });
+}
+
+function handleImageUpload(file){
+  clearRecreateError();
+  resetRecreateResults();
+
+  if(!file){
+    showRecreateError('⚠️ Escolhe uma imagem primeiro.');
+    return;
+  }
+  if(!file.type || !file.type.startsWith('image/')){
+    showRecreateError('❌ O ficheiro precisa ser uma imagem.');
+    return;
+  }
+
+  recreateState.file = file;
+  const dropZone = qs('uploadDropZone');
+  if(dropZone) dropZone.classList.remove('over');
+
+  const previewWrap = qs('imagePreviewWrap');
+  const previewImg = qs('imagePreview');
+  if(previewWrap) previewWrap.style.display = 'block';
+  if(previewImg) previewImg.src = URL.createObjectURL(file);
+
+  // base64 para API
+  return fileToBase64(file).then(({mime, base64})=>{
+    recreateState.base64Image = base64;
+    recreateState.fileMimeType = mime;
+  }).catch(err=>{
+    recreateState.base64Image = null;
+    showRecreateError('❌ Não foi possível processar a imagem.');
+    console.error(err);
+  });
+}
+
+async function generateGeminiImage(){
+  clearRecreateError();
+
+  const keyInput = qs('geminiKeyInput');
+  const apiKey = keyInput ? String(keyInput.value || '').trim() : '';
+
+  if(!apiKey){
+    showRecreateError('⚠️ Introduz a Chave API Gemini.');
+    return;
+  }
+
+  if(recreateState.base64Image == null){
+    showRecreateError('⚠️ Anexa a tua foto antes de gerar.');
+    return;
+  }
+
+  setGenerateLoading(true);
+
+  // guarda chave
+  try{ localStorage.setItem('gemini_key', apiKey); }catch(_){ }
+
+  const prompt = String(qs('promptInput')?.value || '').trim();
+  const mimeType = 'image/jpeg';
+
+  try{
+    const endpoint = `https://generativelanguage.googleapis.com/v1beta/models/gemini-2.0-flash-preview-image-generation:generateContent?key=${encodeURIComponent(apiKey)}`;
+
+    const res = await fetch(endpoint, {
+      method: 'POST',
+      headers: {'Content-Type':'application/json'},
+      body: JSON.stringify({
+        contents: [{
+          role: 'user',
+          parts: [
+            {
+              inline_data: {
+                mime_type: mimeType,
+                data: recreateState.base64Image
+              }
+            },
+            { text: prompt }
+          ]
+        }],
+        generationConfig: {
+          responseModalities: ['TEXT','IMAGE']
+        }
+      })
+    });
+
+    if(!res.ok){
+      const txt = await res.text().catch(()=> '');
+      throw new Error('Falha na API. '+(txt ? txt.slice(0,200) : ''));
+    }
+
+    const response = await res.json();
+
+    let parts = [];
+    try{
+      parts = response?.candidates?.[0]?.content?.parts || [];
+    }catch(_){ parts = []; }
+
+    const imgPart = parts.find(part=>{
+      const mt = part?.inlineData?.mimeType;
+      return typeof mt === 'string' && mt.startsWith('image/');
+    });
+
+    if(!imgPart || !imgPart.inlineData){
+      throw new Error('Não foi possível obter a imagem gerada pela API.');
+    }
+
+    const generatedMimeType = imgPart.inlineData.mimeType || 'image/png';
+    const data = imgPart.inlineData.data;
+
+    if(!data){
+      throw new Error('A resposta não contém dados de imagem.');
+    }
+
+    recreateState.generatedMimeType = generatedMimeType;
+    recreateState.generatedBase64 = data;
+
+    const resultWrap = qs('resultWrap');
+    const img = qs('generatedImage');
+    const downloadBtn = qs('downloadBtn');
+
+    if(resultWrap) resultWrap.style.display = 'block';
+    if(img){
+      img.src = `data:${generatedMimeType};base64,${data}`;
+      img.classList.remove('recreate-fade-in');
+      // reflow for animation
+      void img.offsetWidth;
+      img.classList.add('recreate-fade-in');
+    }
+    if(downloadBtn){
+      downloadBtn.style.display = 'inline-flex';
+    }
+
+    // listener download
+    const dl = qs('downloadBtn');
+    if(dl){
+      dl.onclick = downloadGeneratedImage;
+    }
+
+  }catch(e){
+    console.error(e);
+    showRecreateError('❌ A geração falhou. Verifica a chave e tenta novamente.');
+  }finally{
+    setGenerateLoading(false);
+  }
+}
+
+function downloadGeneratedImage(){
+  const img = qs('generatedImage');
+  const downloadBtn = qs('downloadBtn');
+
+  if(!recreateState.generatedBase64 || !recreateState.generatedMimeType){
+    showRecreateError('⚠️ Ainda não há imagem gerada.');
+    return;
+  }
+
+  try{
+    const mime = recreateState.generatedMimeType;
+    const data = recreateState.generatedBase64;
+    const link = document.createElement('a');
+    link.href = `data:${mime};base64,${data}`;
+    link.download = 'gemini-imagem-recriada.png';
+    document.body.appendChild(link);
+    link.click();
+    link.remove();
+    // best-effort toast
+    toast('✅ Imagem guardada!');
+  }catch(e){
+    console.error(e);
+    showRecreateError('❌ Não foi possível descarregar a imagem.');
+  }
+}
+
+// Wire modal events (once)
+(function wireRecreateModal(){
+  const overlay = getModalOverlay();
+  if(!overlay) return;
+
+  const closeBtn = qs('recreateCloseBtn');
+  if(closeBtn){
+    closeBtn.addEventListener('click', closeRecreateModal);
+  }
+
+  document.addEventListener('keydown', (e)=>{
+    if(e.key === 'Escape' && isModalOpen()) closeRecreateModal();
+  });
+
+  overlay.addEventListener('click', (e)=>{
+    if(e.target === overlay) closeRecreateModal();
+  });
+
+  const dropZone = qs('uploadDropZone');
+  const fileInput = qs('uploadFileInput');
+
+  if(dropZone && fileInput){
+    dropZone.addEventListener('click', ()=>fileInput.click());
+
+    fileInput.addEventListener('change', ()=>{
+      const f = fileInput.files && fileInput.files[0] ? fileInput.files[0] : null;
+      if(f) handleImageUpload(f);
+    });
+
+    // drag and drop
+    ['dragenter','dragover'].forEach(evtName=>{
+      dropZone.addEventListener(evtName, (e)=>{
+        e.preventDefault();
+        e.stopPropagation();
+        dropZone.classList.add('over');
+      });
+    });
+    ['dragleave','drop'].forEach(evtName=>{
+      dropZone.addEventListener(evtName, (e)=>{
+        e.preventDefault();
+        e.stopPropagation();
+        dropZone.classList.remove('over');
+      });
+    });
+    dropZone.addEventListener('drop', (e)=>{
+      const f = e.dataTransfer && e.dataTransfer.files && e.dataTransfer.files[0] ? e.dataTransfer.files[0] : null;
+      if(f) handleImageUpload(f);
+    });
+  }
+
+  const genBtn = qs('generateBtn');
+  if(genBtn){
+    genBtn.addEventListener('click', generateGeminiImage);
+  }
+
+})();
+
+window.handleImageUpload = handleImageUpload;
+window.generateGeminiImage = generateGeminiImage;
+window.downloadGeneratedImage = downloadGeneratedImage;
+
+
+
 // ---- BACK TO TOP ----
 window.addEventListener('scroll', function() {
   const btn = document.getElementById('backToTop');
@@ -633,6 +1053,7 @@ window.addEventListener('scroll', function() {
   if (window.scrollY > 200) btn.classList.add('visible');
   else btn.classList.remove('visible');
 }, { passive: true });
+
 
 </script>
 
