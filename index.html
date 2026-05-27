@@ -5,6 +5,7 @@
 <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
 <title>Ntemoai — Galeria de IA</title>
 <link rel="stylesheet" href="style.css"/>
+<link rel="shortcut icon" href="file_00000000ae5c720a9e128e99fe282992.png" type="image/x-icon">
 </head>
 <body>
 
@@ -107,6 +108,17 @@
 </div>
       <div class="grid" id="galleryGrid"></div>
       <div id="galleryEmpty" class="empty" style="display:none">Ainda não há fotos publicadas.</div>
+      <div id="paginationContainer" class="pagination-container" style="display:none;">
+        <button id="prevBtn" class="pagination-btn pagination-btn-prev" onclick="goToPreviousPage()" aria-label="Página anterior">
+          <span class="pagination-arrow">←</span>
+          <span class="pagination-text">Anterior</span>
+        </button>
+        <div class="pagination-info" id="paginationInfo"></div>
+        <button id="nextBtn" class="pagination-btn pagination-btn-next" onclick="goToNextPage()" aria-label="Próxima página">
+          <span class="pagination-text">Próximo</span>
+          <span class="pagination-arrow">→</span>
+        </button>
+      </div>
       <div class="gallery-footer">
         <div class="footer-grid">
           <div class="footer-newsletter">
@@ -152,7 +164,7 @@
         <div class="prompt-text" id="detailPrompt"></div>
         <div class="detail-actions">
           <button class="btn-lg-accent" id="btnCopyPrompt" onclick="copyPrompt()">Copiar Prompt</button>
-          <button class="btn-lg-ghost">Recriar Imagem</button>
+          <button class="btn-lg-ghost" id="btnRecreateDetail" onclick="window.openRecreateModal(document.getElementById('detailPrompt').textContent)">Recriar Imagem</button>
           <button class="btn-lg-ghost">Guardar no Álbum</button>
 
           <!-- SOCIAL: Like + Views + Share -->
@@ -317,7 +329,7 @@
       </div>
 
       <div class="recreate-body">
-        <div class="recreate-field">
+        <div class="recreate-field" style="display:none;">
           <label for="geminiKeyInput">Chave API Gemini</label>
           <div class="recreate-key-wrap">
             <input id="geminiKeyInput" type="password" placeholder="AIza... (cola a tua chave aqui)" autocomplete="off"/>
@@ -384,6 +396,8 @@ const app = initializeApp(firebaseConfig);
 const db = getFirestore(app);
 let allPhotos=[], photos=[], currentPhoto=null;
 let currentPhotoId=null;
+let currentPage=1;
+const PHOTOS_PER_PAGE=25;
 
 function showPage(page) {
   document.querySelectorAll('.page').forEach(p=>p.classList.remove('active'));
@@ -442,19 +456,26 @@ window.filterTag=function(tag,btn){
   document.querySelectorAll('.tag').forEach(b=>b.classList.remove('active'));
   btn.classList.add('active');
   photos=tag==='all'?[...allPhotos]:allPhotos.filter(p=>p.category===tag);
+  currentPage=1;
   renderGallery();
 };
 window.searchPhotos=function(val){
   const v=val.toLowerCase();
   photos=allPhotos.filter(p=>(p.title||'').toLowerCase().includes(v)||(p.prompt||'').toLowerCase().includes(v)||(p.category||'').toLowerCase().includes(v));
+  currentPage=1;
   renderGallery();
 };
 function renderGallery(){
   const grid=document.getElementById('galleryGrid');
   const empty=document.getElementById('galleryEmpty');
-  if(!photos.length){grid.innerHTML='';empty.style.display='block';return;}
+  const paginationContainer=document.getElementById('paginationContainer');
+  if(!photos.length){grid.innerHTML='';empty.style.display='block';paginationContainer.style.display='none';return;}
   empty.style.display='none';
-  grid.innerHTML=photos.map(p=>{
+  const totalPages=Math.ceil(photos.length/PHOTOS_PER_PAGE);
+  const startIdx=(currentPage-1)*PHOTOS_PER_PAGE;
+  const endIdx=startIdx+PHOTOS_PER_PAGE;
+  const paginatedPhotos=photos.slice(startIdx,endIdx);
+  grid.innerHTML=paginatedPhotos.map(p=>{
     const viewsNum = Number(p.views ?? 0);
     const likesNum = Number(p.likes ?? 0);
     const liked = localStorage.getItem('ntemoai-liked-'+p.id) === '1';
@@ -483,7 +504,40 @@ function renderGallery(){
       '</div>'
     );
   }).join('');
+  updatePagination(totalPages);
 }
+
+function updatePagination(totalPages){
+  const paginationContainer=document.getElementById('paginationContainer');
+  const prevBtn=document.getElementById('prevBtn');
+  const nextBtn=document.getElementById('nextBtn');
+  const paginationInfo=document.getElementById('paginationInfo');
+  if(totalPages<=1){paginationContainer.style.display='none';return;}
+  paginationContainer.style.display='flex';
+  prevBtn.disabled=currentPage===1;
+  nextBtn.disabled=currentPage===totalPages;
+  const startPhoto=(currentPage-1)*PHOTOS_PER_PAGE+1;
+  const endPhoto=Math.min(currentPage*PHOTOS_PER_PAGE,photos.length);
+  paginationInfo.textContent=startPhoto+' - '+endPhoto+' de '+photos.length;
+}
+
+window.goToPreviousPage=function(){
+  if(currentPage>1){
+    currentPage--;
+    renderGallery();
+    window.scrollTo({top:0,behavior:'smooth'});
+  }
+};
+
+window.goToNextPage=function(){
+  const totalPages=Math.ceil(photos.length/PHOTOS_PER_PAGE);
+  if(currentPage<totalPages){
+    currentPage++;
+    renderGallery();
+    window.scrollTo({top:0,behavior:'smooth'});
+  }
+};
+
 window.openDetail=function(id){
   currentPhotoId=id;
   currentPhoto=allPhotos.find(p=>p.id===id);if(!currentPhoto)return;
@@ -743,7 +797,7 @@ function resetRecreateResults(){
   if(downloadBtn) downloadBtn.style.display = 'none';
 }
 
-function openRecreateModal(promptText){
+window.openRecreateModal = function(promptText){
   const overlay = getModalOverlay();
   if(!overlay) return;
 
@@ -785,17 +839,20 @@ function openRecreateModal(promptText){
     const k = qs('geminiKeyInput');
     if(k) k.focus();
   }, 50);
-}
+};
 
-function closeRecreateModal(){
+window.closeRecreateModal = function(){
   const overlay = getModalOverlay();
   if(!overlay) return;
   overlay.style.display = 'none';
   overlay.setAttribute('aria-hidden','true');
-}
+};
 
-window.openRecreateModal = openRecreateModal;
-window.closeRecreateModal = closeRecreateModal;
+window.toggleKeyVisibility = function(){
+  const input = qs('geminiKeyInput');
+  if(!input) return;
+  input.type = input.type === 'password' ? 'text' : 'password';
+};
 
 async function fileToBase64(file){
   return new Promise((resolve, reject)=>{
@@ -951,7 +1008,7 @@ async function generateGeminiImage(){
 
   }catch(e){
     console.error(e);
-    showRecreateError('❌ A geração falhou. Verifica a chave e tenta novamente.');
+    showRecreateError('❌ Imagem não gerada — Funcionalidade exclusiva do plano Pro');
   }finally{
     setGenerateLoading(false);
   }
