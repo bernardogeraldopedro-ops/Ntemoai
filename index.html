@@ -79,7 +79,7 @@
       <button class="lang-btn">EN</button>
     </div>
 
-    <button class="btn-follow">Seguir-nos</button>
+    <button class="btn-follow" onclick="window.open('https://youtube.com/@bernardogeraldo-j5l?si=VhjZ0gRJc1GeIWrV', '_blank')">Seguir-nos</button>
   </div>
 </aside>
 
@@ -143,7 +143,7 @@
           </div>
           <div class="footer-col">
             <h4>Seguir</h4>
-            <a>Facebook</a><a>Instagram</a><a>TikTok</a><a>YouTube</a>
+            <a href="https://www.facebook.com/profile.php?id=100008724935632" target="_blank">Facebook</a><a>Instagram</a><a href="https://www.tiktok.com/@bernardogeraldo565?is_from_webapp=1&sender_device=pc" target="_blank">TikTok</a><a href="https://youtube.com/@bernardogeraldo-j5l?si=VhjZ0gRJc1GeIWrV" target="_blank">YouTube</a>
           </div>
         </div>
         <div class="footer-bottom">© 2026 Ntemoai — Todos os direitos reservados</div>
@@ -497,7 +497,7 @@ function renderGallery(){
             '</button>'+
           '</div>'+
           '<div class="g-card-actions">'+
-            '<button class="btn-sm-accent" onclick="event.stopPropagation();openRecreateModal(\''+(p.prompt||'').replace(/'/g,"\\'")+'\')">Recriar</button>'+
+            '<button class="btn-sm-accent btn-recreate" data-prompt="'+((p.prompt||'').replace(/"/g,'&quot;'))+'" onclick="event.stopPropagation();window.openRecreateModal(this.getAttribute(\'data-prompt\'))">Recriar</button>'+
             '<button class="btn-sm-ghost" onclick="event.stopPropagation();openDetail(\''+p.id+'\')">Ver Prompt</button>'+
           '</div>'+
         '</div>'+
