@@ -143,7 +143,7 @@
           </div>
           <div class="footer-col">
             <h4>Seguir</h4>
-            <a href="https://www.facebook.com/profile.php?id=100008724935632" target="_blank">Facebook</a><a>Instagram</a><a href="https://www.tiktok.com/@bernardogeraldo565?is_from_webapp=1&sender_device=pc" target="_blank">TikTok</a><a href="https://youtube.com/@bernardogeraldo-j5l?si=VhjZ0gRJc1GeIWrV" target="_blank">YouTube</a>
+            <a href="https://www.facebook.com/profile.php?id=100008724935632" target="_blank">Facebook</a><a href="https://www.instagram.com/bernardogeraldopedro?igsh=dDUyM29qZjRzbnBr" target="_blank">Instagram</a><a href="https://www.tiktok.com/@bernardogeraldo565?is_from_webapp=1&sender_device=pc" target="_blank">TikTok</a><a href="https://youtube.com/@bernardogeraldo-j5l?si=VhjZ0gRJc1GeIWrV" target="_blank">YouTube</a>
           </div>
         </div>
         <div class="footer-bottom">© 2026 Ntemoai — Todos os direitos reservados</div>
@@ -273,14 +273,14 @@
         <div class="plan featured">
           <div class="plan-badge">POPULAR</div>
           <div class="plan-tier">Pro</div>
-          <div class="plan-price">9.000 kz<span>/mês</span></div>
+          <div class="plan-price">2.000 kz<span>/mês</span></div>
           <div class="plan-desc">Para criadores sérios.</div>
           <hr/>
           <div class="plan-features">
             <div>✓ Tudo do plano Gratuito</div>
             <div>✓ Álbuns pessoais ilimitados</div>
             <div>✓ Prompts exclusivos</div>
-            <div>✓ Acesso antecipado</div>
+            <div>✓ Recriação de imagem</div>
             <div>✓ Suporte prioritário</div>
           </div>
           <button class="btn-create" style="width:100%;padding:10px;">Em breve</button>
@@ -702,14 +702,14 @@ window.renderShareButtons=function(){
     copyBtn.onclick = async function(){
       try{
         await navigator.clipboard.writeText(pageUrl);
-        toast('✅ Link copiado!');
+        toast(' Link copiado!');
       }catch(_){
         try{
           const ta=document.createElement('textarea');
           ta.value=pageUrl;document.body.appendChild(ta);ta.select();document.execCommand('copy');ta.remove();
-          toast('✅ Link copiado!');
+          toast(' Link copiado!');
         }catch(__){
-          toast('❌ Não foi possível copiar o link.');
+          toast(' Não foi possível copiar o link.');
         }
       }
     }
@@ -880,7 +880,7 @@ function handleImageUpload(file){
     return;
   }
   if(!file.type || !file.type.startsWith('image/')){
-    showRecreateError('❌ O ficheiro precisa ser uma imagem.');
+    showRecreateError(' O ficheiro precisa ser uma imagem.');
     return;
   }
 
@@ -1008,7 +1008,7 @@ async function generateGeminiImage(){
 
   }catch(e){
     console.error(e);
-    showRecreateError('❌ Imagem não gerada — Funcionalidade exclusiva do plano Pro');
+    showRecreateError(' Imagem não gerada — Funcionalidade exclusiva do plano Pro');
   }finally{
     setGenerateLoading(false);
   }

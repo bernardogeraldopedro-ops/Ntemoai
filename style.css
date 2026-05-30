@@ -375,6 +375,10 @@ main.admin-main{margin-left:0;}
 #toast.show{opacity:1;}
 
 /* RESPONSIVE */
+@media(max-width:1024px){
+  .grid{grid-template-columns:repeat(auto-fill,minmax(190px,1fr));}
+}
+
 @media(max-width:900px){
   header.topbar-mobile{display:flex;position:fixed;top:0;left:0;right:0;width:100%;}
   body{overflow-x:hidden;}
@@ -391,19 +395,120 @@ main.admin-main{margin-left:0;}
   .detail-page{flex-direction:column;}
   .detail-sidebar{width:100%;min-height:auto;padding:24px;}
   .detail-img-wrap{padding:20px;}
-  .footer-grid{grid-template-columns:1fr 1fr;}
   .info-grid,.contact-grid{grid-template-columns:1fr;}
   .gallery-page{padding:24px 16px 40px;}
 
   .page-header{flex-direction:column;align-items:flex-start;gap:18px;}
   .page-header-right{width:100%;justify-content:flex-start;flex-wrap:wrap;}
   .inner-box{padding:22px;}
-  .grid{gap:14px;}
-  .footer-grid{grid-template-columns:1fr;}
+  .grid{gap:14px;grid-template-columns:repeat(auto-fill,minmax(160px,1fr));}
+  .footer-grid{grid-template-columns:1fr 1fr;}
 
   .pagination-container{gap:16px;padding:28px 0;margin:28px 0;}
   .pagination-btn{padding:10px 18px;font-size:13px;gap:6px;}
   .pagination-info{font-size:13px;min-width:140px;}
+}
+
+@media(max-width:768px){
+  .page-header h1{font-size:32px;}
+  .inner-box h2{font-size:28px;}
+  .gallery-page{padding:20px 12px 32px;}
+  .inner-box{padding:18px;margin-bottom:24px;}
+  .grid{grid-template-columns:repeat(auto-fill,minmax(140px,1fr));gap:12px;}
+  .footer-grid{grid-template-columns:1fr;}
+  .gallery-footer{padding:32px 20px;margin-top:28px;}
+  .page-header{margin-bottom:24px;}
+}
+
+@media(max-width:600px){
+  header.topbar-mobile{padding:10px 12px;}
+  .topbar-mobile .logo-icon{width:32px;height:32px;}
+  .topbar-mobile .logo-text{font-size:14px;}
+  .hamburger{width:40px;height:40px;}
+  .main{padding-top:64px;}
+
+  .page-header h1{font-size:28px;margin-bottom:16px;}
+  .gallery-page{padding:16px 12px 28px;}
+  .inner-box{padding:16px;margin-bottom:20px;}
+  .inner-box h2{font-size:22px;margin-bottom:6px;}
+  .inner-box p{font-size:13px;}
+  .grid{grid-template-columns:repeat(2,1fr);gap:10px;}
+  .page-header{gap:14px;}
+  .btn-explore{padding:8px 16px;font-size:12px;}
+  
+  .search-bar{padding:11px 14px;font-size:13px;margin-bottom:16px;}
+  .tags-row{gap:6px;}
+  .tag{padding:5px 12px;font-size:11px;}
+  
+  .detail-title{font-size:24px;}
+  .detail-sidebar{padding:20px 16px;}
+  .prompt-text{font-size:12px;padding:12px 14px;}
+  .btn-lg-accent,.btn-lg-ghost{padding:11px;font-size:13px;}
+  
+  .footer-col h4{font-size:9px;margin-bottom:10px;}
+  .footer-col a{font-size:12px;margin-bottom:6px;}
+  .footer-newsletter h2{font-size:20px;line-height:1.2;margin-bottom:12px;}
+  .footer-subscribe{gap:6px;}
+  .footer-subscribe input{padding:8px 12px;font-size:12px;}
+  .footer-subscribe button{padding:8px 14px;font-size:12px;}
+  
+  .pagination-container{gap:12px;padding:20px 0;margin:20px 0;}
+  .pagination-btn{padding:8px 14px;font-size:12px;}
+  .pagination-info{font-size:12px;min-width:120px;}
+  
+  .back-to-top{bottom:16px;right:12px;width:38px;height:38px;}
+  .back-to-top svg{width:16px;height:16px;}
+  
+  .info-grid{gap:14px;}
+  .info-card{padding:18px;}
+  .info-card h3{font-size:15px;}
+  .info-card p{font-size:12px;}
+  
+  .step{padding:18px;gap:14px;}
+  .step-num{width:30px;height:30px;font-size:13px;}
+  .step h3{font-size:13px;}
+  .step p{font-size:12px;}
+  
+  .plans{gap:14px;}
+  .plan{padding:20px;}
+  .plan-tier{font-size:10px;}
+  .plan-price{font-size:28px;}
+  .plan-desc{font-size:12px;margin-bottom:14px;}
+  .plan-features{gap:7px;margin-bottom:16px;}
+  .plan-features div{font-size:12px;}
+  
+  .contact-form{padding:18px;}
+  .contact-form h3{margin-bottom:14px;font-size:14px;}
+  .contact-info{gap:12px;}
+  .contact-item{padding:14px;}
+}
+
+@media(max-width:480px){
+  .page-header h1{font-size:24px;}
+  .inner-box h2{font-size:18px;}
+  .grid{grid-template-columns:1fr;gap:8px;}
+  .skeleton-grid{grid-template-columns:1fr;}
+  
+  .topbar-mobile{padding:8px 10px;}
+  .topbar-mobile .logo-icon{width:30px;height:30px;}
+  .topbar-mobile .logo-text{font-size:13px;}
+  .hamburger{width:38px;height:38px;}
+  
+  .gallery-page{padding:12px 10px 24px;}
+  .inner-box{padding:14px;margin-bottom:16px;}
+  .inner-box p{font-size:12px;}
+  .search-bar{padding:10px 12px;font-size:12px;}
+  
+  .detail-title{font-size:20px;}
+  .detail-date{font-size:12px;}
+  .prompt-label{font-size:10px;}
+  .prompt-text{font-size:11px;padding:10px 12px;min-height:80px;}
+  .btn-lg-accent,.btn-lg-ghost{padding:10px;font-size:12px;}
+  
+  .back-to-top{bottom:14px;right:10px;width:36px;height:36px;}
+  
+  .footer-newsletter h2{font-size:18px;margin-bottom:10px;}
+  .footer-bottom{font-size:11px;margin-top:20px;padding-top:16px;}
 }
 
 
@@ -576,6 +681,12 @@ main.admin-main{margin-left:0;}
 /* =============================================
    MOBILE RESPONSIVE UPDATES
    ============================================= */
+@media(max-width:1024px){
+  .skeleton-grid {
+    grid-template-columns: repeat(3, 1fr);
+    gap: 10px;
+  }
+}
 @media(max-width:991px){
   .skeleton-grid {
     grid-template-columns: repeat(2, 1fr);
@@ -588,9 +699,22 @@ main.admin-main{margin-left:0;}
     height: 40px;
   }
 }
+@media(max-width:600px){
+  .skeleton-grid {
+    grid-template-columns: 1fr;
+    gap: 8px;
+  }
+}
 @media(max-width:480px){
   .skeleton-grid {
     grid-template-columns: 1fr;
+    gap: 6px;
+  }
+  .back-to-top {
+    bottom: 14px;
+    right: 10px;
+    width: 36px;
+    height: 36px;
   }
 }
 
@@ -820,7 +944,61 @@ main.admin-main{margin-left:0;}
   line-height:1.35;
 }
 
+@media(max-width:768px){
+  .recreate-modal{
+    max-width:100%;
+  }
+  .recreate-modal-inner{
+    padding:16px 14px 14px;
+  }
+  .recreate-modal-header h2{
+    font-size:16px;
+  }
+  .recreate-field input,
+  .recreate-field textarea{
+    padding:11px 12px;
+    font-size:13px;
+  }
+  .recreate-field textarea{
+    min-height:80px;
+  }
+}
+
 @media(max-width:520px){
-  .recreate-modal-inner{padding:16px 14px 14px;}
+  .recreate-modal-overlay{
+    padding:16px 12px 32px;
+  }
+  .recreate-modal-inner{
+    padding:14px 12px 12px;
+  }
+  .recreate-modal-header h2{
+    font-size:14px;
+  }
+  .recreate-field input,
+  .recreate-field textarea{
+    padding:10px 11px;
+    font-size:12px;
+  }
+  .recreate-field textarea{
+    min-height:70px;
+  }
+  .recreate-close{
+    width:36px;
+    height:36px;
+    font-size:20px;
+  }
+  .recreate-dropzone{
+    padding:16px 12px;
+  }
+  .recreate-dropzone-text{
+    font-size:13px;
+  }
+  .recreate-dropzone-sub{
+    font-size:11px;
+  }
+  .recreate-generate-btn{
+    padding:10px 14px;
+    font-size:13px;
+  }
 }
 
